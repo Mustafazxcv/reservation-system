@@ -1,0 +1,55 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  email             String  @unique
+  password          String
+  phoneNumber       String
+  fullname          String
+  status            Boolean
+  emailVerification Boolean
+}
+
+model Booking {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fullname    String
+  email       String
+  phoneNumber String
+  bookingNote String
+  timezone    String
+  dealer      Dealer   @relation(fields: [dealerId], references: [id])
+  dealerId    String   @db.ObjectId
+  date        DateTime
+  time        String
+  status      String
+}
+
+model Dealer {
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  dealerName        String
+  email             String     @unique
+  password          String
+  phoneNumber       String
+  contactName       String
+  status            Boolean
+  emailVerification Boolean
+  timezone          String
+  bookings          Booking[]
+}
+
+
+model Guest {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  fullname    String
+  email       String
+  phoneNumber String
+  bookingNote String
+  timezone    String
+}
