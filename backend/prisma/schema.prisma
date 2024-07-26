@@ -21,7 +21,7 @@ model Booking {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   fullname    String
   email       String
-  phoneNumber String
+  phoneNumber String   
   bookingNote String
   timezone    String
   dealer      Dealer   @relation(fields: [dealerId], references: [id])

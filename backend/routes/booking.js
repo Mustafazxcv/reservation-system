@@ -4,7 +4,22 @@ const prisma = new PrismaClient();
 const { authenticateToken, authorizeRole } = require('../middlewares/auth');
 const router = express.Router();
 
-// Yeni endpoint: Rezervasyon Detayları (Konuklar için)
+router.get('/dealer/bookings', authenticateToken, authorizeRole('dealer'), async (req, res) => {
+  const dealerId = req.user.id;
+
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        dealerId: dealerId
+      }
+    });
+    res.json(bookings);
+  } catch (error) {
+    console.error('Rezervasyonlar alınamadı:', error);
+    res.status(500).json({ error: 'Rezervasyonlar alınamadı.', details: error.message });
+  }
+});
+
 router.post('/guest/details', async (req, res) => {
   const { fullname, email, phoneNumber } = req.body;
 
@@ -33,8 +48,16 @@ router.post('/', authenticateToken, authorizeRole('dealer'), async (req, res) =>
   const dealerId = req.user.id;
 
   try {
-    const isoDate = new Date(date);
+    // Telefon numarasının benzersizliğini kontrol et
+    const existingBooking = await prisma.booking.findFirst({
+      where: { phoneNumber: phoneNumber }
+    });
 
+    if (existingBooking) {
+      return res.status(400).json({ error: 'Bu telefon numarasıyla zaten bir rezervasyon mevcut.' });
+    }
+
+    const isoDate = new Date(date);
     if (isNaN(isoDate.getTime())) {
       throw new Error('Geçersiz tarih formatı.');
     }
