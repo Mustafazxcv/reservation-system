@@ -1,6 +1,6 @@
 # Rezervasyon Sistemi
 
-Bu proje, bayilerin kendi rezervasyonlarını yönetebileceği, adminlerin bayileri yönetebileceği ve kullanıcıların rezervasyonlarını kontrol edebileceği bir rezervasyon sistemidir. Proje, Node.js, Prisma, MongoDB ve JWT kullanılarak geliştirilmiştir.
+Bu proje, bayilerin kendi rezervasyonlarını yönetebileceği, adminlerin bayileri yönetebileceği ve kullanıcıların rezervasyonlarını kontrol edebileceği bir rezervasyon sistemidir. Proje, Node.js, Prisma, MongoDB React.js TailwindCSS ve JWT kullanılarak geliştirilmiştir.
 
 ## Özellikler
 
