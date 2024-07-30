@@ -68,6 +68,8 @@ const bookingRoutes = require('./routes/booking');
 const adminRoutes = require('./routes/admin');
 const bookingsByPhoneRoutes = require('./routes/bookingsByPhone');
 const statsRoutes = require('./routes/stats');
+const dealerOperationsRouter = require('./routes/dealer_operations');
+const cancelBookingRoutes = require('./routes/cancelBooking'); // Yeni iptal rotası
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dealers', dealerRoutes);
@@ -75,6 +77,8 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', bookingsByPhoneRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api', dealerOperationsRouter);
+app.use('/api/cancel', cancelBookingRoutes); // Yeni iptal rotası
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Sunucu ${PORT} portunda çalışıyor`));

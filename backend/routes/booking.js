@@ -1,5 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const moment = require('moment-timezone');
 const prisma = new PrismaClient();
 const { authenticateToken, authorizeRole } = require('../middlewares/auth');
 const router = express.Router();
@@ -48,7 +49,6 @@ router.post('/', authenticateToken, authorizeRole('dealer'), async (req, res) =>
   const dealerId = req.user.id;
 
   try {
-    // Telefon numarasının benzersizliğini kontrol et
     const existingBooking = await prisma.booking.findFirst({
       where: { phoneNumber: phoneNumber }
     });
@@ -57,10 +57,8 @@ router.post('/', authenticateToken, authorizeRole('dealer'), async (req, res) =>
       return res.status(400).json({ error: 'Bu telefon numarasıyla zaten bir rezervasyon mevcut.' });
     }
 
-    const isoDate = new Date(date);
-    if (isNaN(isoDate.getTime())) {
-      throw new Error('Geçersiz tarih formatı.');
-    }
+    // Tarih ve saati tam ISO 8601 formatına dönüştürme
+    const bookingDateTime = moment.tz(`${date} ${time}`, timezone).toISOString();
 
     const booking = await prisma.booking.create({
       data: {
@@ -70,8 +68,8 @@ router.post('/', authenticateToken, authorizeRole('dealer'), async (req, res) =>
         bookingNote,
         timezone,
         dealer: { connect: { id: dealerId } },
-        date: isoDate,
-        time,
+        date: bookingDateTime,
+        time: bookingDateTime,
         status: 'Upcoming'
       }
     });
@@ -107,7 +105,7 @@ router.get('/dealer/past', authenticateToken, authorizeRole('dealer'), async (re
   try {
     const bookings = await prisma.booking.findMany({
       where: {
-        dealerId,
+        dealerId: dealerId,
         status: 'Past',
         date: {
           lt: new Date()
@@ -116,7 +114,8 @@ router.get('/dealer/past', authenticateToken, authorizeRole('dealer'), async (re
     });
     res.json(bookings);
   } catch (error) {
-    res.status(500).json({ error: 'Geçmiş rezervasyonlar alınamadı.' });
+    console.error('Geçmiş rezervasyonlar alınamadı:', error);
+    res.status(500).json({ error: 'Geçmiş rezervasyonlar alınamadı.', details: error.message });
   }
 });
 
@@ -158,44 +157,5 @@ router.get('/dealer/upcoming-week', authenticateToken, authorizeRole('dealer'), 
     res.status(500).json({ error: 'Yaklaşan 1 hafta içindeki rezervasyonlar alınamadı.' });
   }
 });
-router.put('/cancel/:id', authenticateToken, authorizeRole('dealer'), async (req, res) => {
-  const { id } = req.params;
-  const dealerId = req.user.id;
 
-  try {
-    const booking = await prisma.booking.updateMany({
-      where: {
-        id,
-        dealerId,
-        status: 'Upcoming'
-      },
-      data: {
-        status: 'Canceled'
-      }
-    });
-
-    if (booking.count === 0) {
-      return res.status(404).json({ error: 'Rezervasyon bulunamadı veya zaten iptal edilmiş.' });
-    }
-
-    res.json({ message: 'Rezervasyon iptal edildi.' });
-  } catch (error) {
-    res.status(400).json({ error: 'Rezervasyon iptal edilemedi.' });
-  }
-});
-router.get('/dealer/canceled', authenticateToken, authorizeRole('dealer'), async (req, res) => {
-  const dealerId = req.user.id;
-
-  try {
-    const bookings = await prisma.booking.findMany({
-      where: {
-        dealerId,
-        status: 'Canceled'
-      }
-    });
-    res.json(bookings);
-  } catch (error) {
-    res.status(500).json({ error: 'İptal edilmiş rezervasyonlar alınamadı.' });
-  }
-});
 module.exports = router;

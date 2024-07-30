@@ -60,31 +60,35 @@ router.get('/dealers', authenticateToken, authorizeRole('admin'), async (req, re
 });
 
 // Bayi Güncelleme
-router.put('/dealers/:id', authenticateToken, authorizeRole('admin'), async (req, res) => {
-  const { id } = req.params;
-  const { dealerName, email, phoneNumber, contactName, status, timezone } = req.body;
+// Bayi Güncelleme (Admin Tokena gerek yok)
+router.put('/dealers/phone/:phoneNumber', async (req, res) => {
+  const { phoneNumber } = req.params;
+  const { dealerName, email, contactName, status, timezone } = req.body;
 
   try {
     const dealer = await prisma.dealer.update({
-      where: { id },
+      where: { phoneNumber },
       data: { dealerName, email, phoneNumber, contactName, status, timezone }
     });
     res.json(dealer);
   } catch (error) {
-    res.status(400).json({ error: 'Bayi güncellenemedi.' });
+    console.error('Error updating dealer:', error);
+    res.status(400).json({ error: 'Bayi güncellenemedi. Hata: ' + error.message });
   }
 });
 
-// Bayi Silme
-router.delete('/dealers/:id', authenticateToken, authorizeRole('admin'), async (req, res) => {
-  const { id } = req.params;
+// Bayi Silme (Admin Tokena gerek yok)
+router.delete('/dealers/phone/:phoneNumber', async (req, res) => {
+  const { phoneNumber } = req.params;
 
   try {
-    await prisma.dealer.delete({ where: { id } });
+    await prisma.dealer.delete({ where: { phoneNumber } });
     res.json({ message: 'Bayi silindi.' });
   } catch (error) {
-    res.status(400).json({ error: 'Bayi silinemedi.' });
+    console.error('Error deleting dealer:', error);
+    res.status(400).json({ error: 'Bayi silinemedi. Hata: ' + error.message });
   }
 });
+
 
 module.exports = router;

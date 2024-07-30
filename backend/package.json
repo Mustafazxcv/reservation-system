@@ -18,8 +18,10 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mailgun-js": "^0.22.0",
+    "moment-timezone": "^0.5.45",
     "mongoose": "^8.5.1",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.14"
   },
   "devDependencies": {
     "prisma": "^5.17.0"

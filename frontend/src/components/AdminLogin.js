@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -30,16 +32,21 @@ const AdminLogin = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Admin logged in:', result);
+        console.log('Admin Giriş Yaptı.:', result);
         // Token'ı yerel depolamaya kaydet
         localStorage.setItem('admin_token', result.token);
+        // Başarılı giriş bildirimi
+        toast.success('Giriş başarılı! Yönlendiriliyorsunuz...');
         // Dashboard sayfasına yönlendir
-        navigate('/dashboard');
+        setTimeout(() => navigate('/dashboard'), 2000); // 2 saniye bekleyip yönlendir
       } else {
-        console.error('Login failed');
+        // Başarısız giriş bildirimi
+        toast.error('Giriş başarısız! Lütfen tekrar deneyin.');
       }
     } catch (error) {
       console.error('Error:', error);
+      // Genel hata bildirimi
+      toast.error('Bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -97,15 +104,21 @@ const AdminLogin = () => {
           </div>
         </div>
       </div>
+
+      {/* ToastContainer component */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };
 
 export default AdminLogin;
-
-
-
-
-
-
-

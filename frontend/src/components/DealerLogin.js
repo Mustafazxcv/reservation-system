@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const DealerLogin = () => {
   const [formData, setFormData] = useState({
@@ -33,12 +35,17 @@ const DealerLogin = () => {
         console.log('Dealer logged in:', result);
         // Token'ı yerel depolamaya kaydet
         localStorage.setItem('dealer_token', result.token);
+        // Başarı mesajı göster
+        toast.success('Giriş başarılı!');
         // Bayi dashboard sayfasına yönlendir
-        navigate('/bayiidashboard');
+        setTimeout(() => navigate('/bayiidashboard'), 2000); // 2 saniye sonra yönlendir
       } else {
-        console.error('Login failed');
+        // Hata mesajı göster
+        toast.error('Giriş başarısız, lütfen bilgilerinizi kontrol edin.');
       }
     } catch (error) {
+      // Hata mesajı göster
+      toast.error('Bir hata oluştu, lütfen tekrar deneyin.');
       console.error('Error:', error);
     }
   };
@@ -97,6 +104,19 @@ const DealerLogin = () => {
           </div>
         </div>
       </div>
+
+      {/* ToastContainer component */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 };

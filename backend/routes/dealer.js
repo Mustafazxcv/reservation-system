@@ -5,9 +5,11 @@ const prisma = new PrismaClient();
 const { authenticateToken, authorizeRole } = require('../middlewares/auth');
 const router = express.Router();
 
-router.post('/register', async (req, res) => {
+// Bayi Kayıt İşlemi
+router.post('/register/dealer', async (req, res) => {
   const { dealerName, email, password, phoneNumber, contactName, timezone } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
   try {
     const dealer = await prisma.dealer.create({
@@ -17,16 +19,37 @@ router.post('/register', async (req, res) => {
         password: hashedPassword,
         phoneNumber,
         contactName,
-        status: true,
+        status: 'pending',
         emailVerification: false,
+        verificationToken: token,
         timezone
       }
     });
-    res.status(201).json(dealer);
+
+    const verificationLink = `http://localhost:3000/api/auth/verify/${token}`;
+
+    const mailOptions = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'Email Verification',
+      text: `Please verify your email by clicking the following link: ${verificationLink}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).send('Error sending email');
+      }
+      console.log('Email sent: ' + info.response);
+    });
+
+    res.status(201).json({ message: 'Dealer registered, verification email sent' });
   } catch (error) {
-    res.status(400).json({ error: 'Bayi kaydı başarısız.' });
+    console.error('Error during dealer registration:', error);
+    res.status(400).json({ error: 'Bayi kaydı başarısız.', details: error.message });
   }
 });
+
 
 router.get('/', authenticateToken, authorizeRole('admin'), async (req, res) => {
   try {

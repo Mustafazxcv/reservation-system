@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import moment from 'moment-timezone';
 
 const RegisterDealer = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +14,12 @@ const RegisterDealer = () => {
     timezone: ''
   });
 
+  const [availableTimezones, setAvailableTimezones] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setAvailableTimezones(moment.tz.names());
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,14 +41,15 @@ const RegisterDealer = () => {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Dealer registered:', result);
-        // Kayıt başarılı olursa, bayi giriş sayfasına yönlendir
-        navigate('/login/dealer');
+        toast.success('Dealer registered, please check your email for verification link.');
+        navigate('/verify-email');
       } else {
-        console.error('Registration failed');
+        const errorData = await response.json();
+        toast.error(`Kayıt Başarısız: ${errorData.error}`);
+        console.error('Kayıt Başarısız:', errorData);
       }
     } catch (error) {
+      toast.error('Error occurred during registration.');
       console.error('Error:', error);
     }
   };
@@ -135,15 +144,18 @@ const RegisterDealer = () => {
               <div>
                 <label htmlFor="timezone" className="block text-sm font-medium text-gray-700">Timezone:</label>
                 <div className="mt-1">
-                  <input
-                    type="text"
+                  <select
                     id="timezone"
                     name="timezone"
                     value={formData.timezone}
                     onChange={handleChange}
                     required
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  />
+                  >
+                    {availableTimezones.map(tz => (
+                      <option key={tz} value={tz}>{tz}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -159,6 +171,8 @@ const RegisterDealer = () => {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

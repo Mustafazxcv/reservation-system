@@ -17,32 +17,34 @@ model Admin {
   emailVerification Boolean
 }
 
+model Dealer {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  dealerName         String
+  email              String    @unique
+  password           String
+  phoneNumber        String
+  contactName        String
+  status             Boolean
+  emailVerification  Boolean
+  verificationToken  String?
+  timezone           String
+  bookings           Booking[]
+}
+
 model Booking {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   fullname    String
   email       String
-  phoneNumber String   
+  phoneNumber String
   bookingNote String
   timezone    String
+  date        DateTime @default(now())
+  time        DateTime
+  status      String
   dealer      Dealer   @relation(fields: [dealerId], references: [id])
   dealerId    String   @db.ObjectId
-  date        DateTime
-  time        String
-  status      String
 }
 
-model Dealer {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
-  dealerName        String
-  email             String     @unique
-  password          String
-  phoneNumber       String
-  contactName       String
-  status            Boolean
-  emailVerification Boolean
-  timezone          String
-  bookings          Booking[]
-}
 
 
 model Guest {
